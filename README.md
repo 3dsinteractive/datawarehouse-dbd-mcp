@@ -29,7 +29,7 @@ server นี้ออกแบบให้เป็น **wrapper REST API ท�
 
 ```
 src/
-├── index.ts        เริ่ม MCP server (stdio transport)
+├── index.ts        เริ่ม MCP server (Streamable HTTP หรือ stdio)
 ├── session.ts      bootstrap session ครั้งเดียวด้วย Playwright headless
 │                   ดึง Incapsula cookies + JWT แล้วใช้ Bun fetch ทำ request ต่อ
 ├── crypto.ts       ถอดรหัสซอง AES-GCM + HKDF-SHA256 + zlib inflate
@@ -68,10 +68,29 @@ bunx playwright install chromium
 
 ## การใช้งาน / Usage
 
+### รันแบบ Streamable HTTP
+
+```bash
+bun run start
+```
+
+MCP endpoint: `http://localhost:3000/mcp` (ตั้งค่า `PORT` และ `HOST` ได้ผ่าน environment variables)
+ตรวจสอบสถานะด้วย `GET http://localhost:3000/health`.
+
+### รันด้วย Docker
+
+```bash
+docker build -t datawarehouse-dbd-mcp .
+docker run --rm -p 127.0.0.1:3000:3000 datawarehouse-dbd-mcp
+```
+
+เชื่อมต่อ MCP client ไปที่ `http://localhost:3000/mcp`. Tool call แรกจะเปิด Chromium
+เพื่อสร้าง DBD session; image รวม Chromium และ system dependencies แล้ว.
+
 ### รันแบบ stdio
 
 ```bash
-bun src/index.ts
+bun run start:stdio
 ```
 
 ### ตั้งค่าใน Claude Desktop
@@ -83,7 +102,7 @@ bun src/index.ts
   "mcpServers": {
     "dbd": {
       "command": "bun",
-      "args": ["/absolute/path/to/datawarehouse-dbd-mcp/src/index.ts"]
+      "args": ["/absolute/path/to/datawarehouse-dbd-mcp/src/index.ts", "--stdio"]
     }
   }
 }
@@ -92,7 +111,7 @@ bun src/index.ts
 ### ตั้งค่าใน Claude Code
 
 ```bash
-claude mcp add dbd -- bun /absolute/path/to/datawarehouse-dbd-mcp/src/index.ts
+claude mcp add dbd -- bun /absolute/path/to/datawarehouse-dbd-mcp/src/index.ts --stdio
 ```
 
 ## รายการ Tool ทั้งหมด / Tool reference

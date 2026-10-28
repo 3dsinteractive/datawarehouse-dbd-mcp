@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "bun src/index.ts",
+    "start:stdio": "bun src/index.ts --stdio",
     "typecheck": "tsc --noEmit",
     "postinstall": "playwright install chromium --with-deps || playwright install chromium"
   },
